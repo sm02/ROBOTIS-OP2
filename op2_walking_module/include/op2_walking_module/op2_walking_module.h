@@ -208,6 +208,8 @@ class WalkingModule : public robotis_framework::MotionModule, public robotis_fra
   bool ctrl_running_;
   bool real_running_;
   double time_;
+  bool step_count_;
+  int steps_todo_;
 
   int phase_;
   double body_swing_y;

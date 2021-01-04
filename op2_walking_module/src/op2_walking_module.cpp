@@ -202,10 +202,18 @@ void WalkingModule::walkingCommandCallback(const std_msgs::String::ConstPtr &msg
     return;
   }
 
-  if (msg->data == "start")
+  if (msg->data == "start") {
+    step_count_ = false;
     startWalking();
+  }
   else if (msg->data == "stop")
     stop();
+  else if (msg->data.find("step ") == 0) {
+    std::string arg = msg->data.substr(5,std::string::npos);
+    step_count_ = true;
+    steps_todo_ = std::atoi(arg.c_str());	  
+    if (steps_todo_ > 0) startWalking();
+  }
   else if (msg->data == "balance on")
     walking_param_.balance_enable = true;
   else if (msg->data == "balance off")
@@ -567,6 +575,13 @@ void WalkingModule::process(std::map<std::string, robotis_framework::Dynamixel *
     {
       time_ = 0;
       previous_x_move_amplitude_ = walking_param_.x_move_amplitude * 0.5;
+      if (step_count_) {
+		steps_todo_ --;
+		if (steps_todo_ <= 0 ) {
+          ctrl_running_ = false;
+          publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Steps done");
+        }
+      }
     }
   }
 }
